@@ -283,7 +283,16 @@ begin
 
       // Attempt to store compiled Lua bytecode into the payload executable
       if LjetLua.StorePayload('.\res\scripts\compiled.lua', 'Payload.exe') then
-        LjetLua.PrintLn('Saved bytecode to "Payload.exe"', [])
+        begin
+          // Attempt to update payload EXE main icon
+          LjetLua.PrintLn('Saved bytecode to "Payload.exe"', []);
+          if LjetLua.UpdatePayloadIcon('Payload.exe', '.\res\icons\cog.ico') then
+            LjetLua.PrintLn('Added icon %s"" to "Payload.exe"', ['.\res\icons\cog.ico']);
+
+          // Attemp to update payload EXE version information
+          if LjetLua.UpdatePayloadVersionInfo('Payload.exe', 1, 0, 0, 'Payload', 'Payload', 'Payload.exe', 'tinyBigGAMES LLC', 'Copyright (c) 2024-present, tinyBigGAMES LLC') then
+            LjetLua.PrintLn('Added version info to "Payload.exe"', ['.\res\icons\cog.ico']);
+        end
       else
         LjetLua.PrintLn('Failed to save bytecode to "Payload.exe"', []);
 
