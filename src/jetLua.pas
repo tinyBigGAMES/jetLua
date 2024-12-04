@@ -818,6 +818,22 @@ type
     /// </example>
     function GetVariable(const AName: string): TValue;
 
+
+    /// <summary>
+    /// Executes the Lua code that has been previously loaded into the Lua state.
+    /// This method attempts to execute the Lua script that is currently loaded at the top of the script stack.
+    /// If no Lua code is found or the code is invalid, an exception will be raised, indicating an issue with executing the script.
+    /// </summary>
+    /// <remarks>
+    /// Use case:
+    /// Call this method after calling `LoadFile`, `LoadString`, or `LoadBuffer` with the `AAutoRun` parameter set to `False`.
+    /// This allows for manual control over when the Lua script is executed, providing flexibility for runtime management of Lua scripts.
+    /// </remarks>
+    /// <exception cref="EjetLuaException">
+    /// Thrown if no Lua code is found or if the code is invalid.
+    /// </exception>
+    procedure Run();
+
     /// <summary>
     /// Calls a Lua function with the specified name and parameters, returning the result.
     /// This method enables Delphi applications to invoke Lua functions dynamically, passing data and receiving results seamlessly.
@@ -3318,6 +3334,33 @@ begin
   // Convert the Lua value to a Delphi TValue
   Result := GetValueFromLua(-1);
   lua_pop(FState, 1); // Clean up the stack
+end;
+
+procedure TjetLua.Run();
+var
+  LErr: string;
+  LRes: Integer;
+begin
+  if not Assigned(FState) then Exit;
+
+  // Check if the stack has any values
+  if lua_gettop(FState) = 0 then
+    raise EjetLuaException.Create('Lua stack is empty. Nothing to run.');
+
+  // Check if the top of the stack is a function
+  if lua_type(FState, lua_gettop(FState)) <> LUA_TFUNCTION then
+    raise EjetLuaException.Create('Top of the stack is not a callable function.');
+
+  // Call the function on the stack
+  LRes := lua_pcall(FState, 0, LUA_MULTRET, 0);
+
+  // Handle errors from pcall
+  if LRes <> LUA_OK then
+  begin
+    LErr := lua_tostring(FState, -1);
+    lua_pop(FState, 1);
+    raise EjetLuaException.Create(LErr);
+  end;
 end;
 
 function TjetLua.Call(const AName: string; const AParams: array of const): TValue;

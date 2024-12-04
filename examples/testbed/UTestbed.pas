@@ -299,9 +299,16 @@ begin
         LStream.Free();
       end;
 
-      // Final reset and loading of the compiled Lua script from file
+      // Reset again and auto running a Lua script from file
+      LjetLua.PrintLn('Auto run lua script...', []);
       LjetLua.Reset();
       LjetLua.LoadFile('.\res\scripts\compiled.lua');
+
+      // Reset again and loading of Lua script from file, then running
+      LjetLua.PrintLn('Load then run lua script...', []);
+      LjetLua.Reset();
+      LjetLua.LoadFile('.\res\scripts\compiled.lua', False);
+      LjetLua.Run();
 
     except
       on E: Exception do
