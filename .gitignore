@@ -83,3 +83,4 @@ bin/res/scripts/compiled_bundle.lua
 !src/jetLua.o
 *.dsv
 !bin/res/*
+bin/Test.ini

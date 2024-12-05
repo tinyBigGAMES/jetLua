@@ -162,6 +162,30 @@ exports
 const
   CScript =
   '''
+  -- Check Current JIT State
+  local function formatJitStatus()
+      local status, mode, version = jit.status()
+      local optimizations = {"SSE3", "SSE4.1", "BMI2", "fold", "cse", "dce", "fwd", "dse", "narrow", "loop", "abc", "sink", "fuse"}
+
+      print("JIT Status:")
+      print("  Enabled: " .. tostring(status))
+      print("  Mode   : " .. tostring(mode))
+      print("  Version: " .. tostring(version))
+      print("Enabled Optimizations:")
+
+      for _, opt in ipairs(optimizations) do
+          if mode:find(opt) then
+              print("  - " .. opt)
+          end
+      end
+
+      print("LuaJIT Version:", jit.version)
+      print("Version Number:", jit.version_num)
+      print("OS            :", jit.os)
+      print("Architecture  :", jit.arch)
+  end
+  formatJitStatus()
+
   -- Custom "import" example: importing a Lua module
   local mm = import("./res/scripts/mymath.lua")
   mm.add(50,50)
@@ -173,9 +197,9 @@ const
   print("test_table: " .. test_table.test)
 
   -- Accessing Delphi-provided variables from Lua
-  print("LuaJIT Version: " .. jetLua.luaJitVersion)
-  print("Lua Version: " .. jetLua.luaVersion)
-  print("jetLua Version: " .. jetLua.version)
+  print("jetLua.luaJitVersion: " .. jetLua.luaJitVersion)
+  print("jetLua.luaVersion: " .. jetLua.luaVersion)
+  print("jetLua.version: " .. jetLua.version)
 
   -- Demonstrating Delphi class methods in Lua
   print("Testing TTestClass methods...")
@@ -224,7 +248,7 @@ const
   ]]
   local user32 = ffi.load("user32.dll")
   user32.MessageBoxA(nil, "Hello from LuaJIT!", "FFI Example", 0)
-  ''';
+ ''';
 
 // Test procedure demonstrating Lua integration and various functionalities
 procedure Test01();
@@ -287,7 +311,7 @@ begin
           // Attempt to update payload EXE main icon
           LjetLua.PrintLn('Saved bytecode to "Payload.exe"', []);
           if LjetLua.UpdatePayloadIcon('Payload.exe', '.\res\icons\cog.ico') then
-            LjetLua.PrintLn('Added icon %s"" to "Payload.exe"', ['.\res\icons\cog.ico']);
+            LjetLua.PrintLn('Added icon "%s" to "Payload.exe"', ['.\res\icons\cog.ico']);
 
           // Attemp to update payload EXE version information
           if LjetLua.UpdatePayloadVersionInfo('Payload.exe', 1, 0, 0, 'Payload', 'Payload', 'Payload.exe', 'tinyBigGAMES LLC', 'Copyright (c) 2024-present, tinyBigGAMES LLC') then

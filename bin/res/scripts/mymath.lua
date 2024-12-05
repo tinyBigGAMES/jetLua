@@ -1,18 +1,16 @@
 --[[---------------------------------------------------------------------------
+    _      _   _
+   (_) ___| |_| |   _   _  __ _ ™
+   | |/ _ \ __| |  | | | |/ _` |
+   | |  __/ |_| |__| |_| | (_| |
+  _/ |\___|\__|_____\__,_|\__,_|
+ |__/
+  A best-in-class Lua scripting
+       solution for Delphi
 
-                  ___  _                    _
-                 / __|| |_   __ _  _ _   __| | _ _  __ _ ™
-                | (__ | ' \ / _` || ' \ / _` || '_|/ _` |
-                 \___||_||_|\__,_||_||_|\__,_||_|  \__,_|
-                         Lua Scripting for Pascal
-
-                 Copyright © 2024-present tinyBigGAMES™ LLC
-                          All Rights Reserved.
-
-                   https://github.com/tinyBigGAMES/PLUA
-
-                 See LICENSE file for license information
- ----------------------------------------------------------------------------]]
+ Copyright © 2024-present tinyBigGAMES™ LLC
+ All Rights Reserved.
+-----------------------------------------------------------------------------]]
 
 local mymath =  {}
 

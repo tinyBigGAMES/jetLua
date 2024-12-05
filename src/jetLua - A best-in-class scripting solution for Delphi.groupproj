@@ -1,0 +1,48 @@
+﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <PropertyGroup>
+        <ProjectGuid>{5584B8DA-04A4-45A9-9AD7-7C8014584093}</ProjectGuid>
+    </PropertyGroup>
+    <ItemGroup>
+        <Projects Include="cli\jlu.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="..\examples\testbed\Testbed.dproj">
+            <Dependencies/>
+        </Projects>
+    </ItemGroup>
+    <ProjectExtensions>
+        <Borland.Personality>Default.Personality.12</Borland.Personality>
+        <Borland.ProjectType/>
+        <BorlandProject>
+            <Default.Personality/>
+        </BorlandProject>
+    </ProjectExtensions>
+    <Target Name="jlu">
+        <MSBuild Projects="cli\jlu.dproj"/>
+    </Target>
+    <Target Name="jlu:Clean">
+        <MSBuild Projects="cli\jlu.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="jlu:Make">
+        <MSBuild Projects="cli\jlu.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="Testbed">
+        <MSBuild Projects="..\examples\testbed\Testbed.dproj"/>
+    </Target>
+    <Target Name="Testbed:Clean">
+        <MSBuild Projects="..\examples\testbed\Testbed.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="Testbed:Make">
+        <MSBuild Projects="..\examples\testbed\Testbed.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="Build">
+        <CallTarget Targets="jlu;Testbed"/>
+    </Target>
+    <Target Name="Clean">
+        <CallTarget Targets="jlu:Clean;Testbed:Clean"/>
+    </Target>
+    <Target Name="Make">
+        <CallTarget Targets="jlu:Make;Testbed:Make"/>
+    </Target>
+    <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
+</Project>
