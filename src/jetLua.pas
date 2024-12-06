@@ -673,6 +673,21 @@ type
     procedure RegisterRoutines(AClass: TClass; const ATableName: string = '');
 
     /// <summary>
+    /// Passes the current command-line arguments to Lua, starting from the specified index.
+    /// This method allows you to make command-line arguments available to Lua scripts, starting from the index defined by `AStartIndex`.
+    /// It can be useful when you want to pass arguments from the command line to Lua for processing within a script.
+    /// </summary>
+    /// <remarks>
+    /// Use case:
+    /// Call this method to provide Lua scripts with access to command-line arguments, starting from a specific index.
+    /// This is useful for passing external data or options to a Lua script that can be processed or used during execution.
+    ///
+    /// The method will validate the provided `AStartIndex` and ensure that it is within the valid range (from 0 to `ParamCount-1`).
+    /// If the index is out of range, the method will handle the error appropriately.
+    /// </remarks>
+    procedure UpdateArgs(const AStartIndex: Integer);
+
+    /// <summary>
     /// Loads and executes a Lua script file.
     /// This method allows for the integration of external Lua scripts, enabling dynamic script execution within the Delphi application.
     /// </summary>
@@ -1799,6 +1814,7 @@ procedure lua_close(L: Plua_State); cdecl; external;
 function  lua_tointeger(L: Plua_State; idx: Integer): lua_Integer; cdecl; external;
 function  lua_isstring(L: Plua_State; idx: Integer): Integer; cdecl; external;
 function  lua_gc(L: Plua_State; what: Integer; data: Integer): Integer; cdecl; external;
+procedure lua_rawseti(L: Plua_State; idx: Integer; n: Integer); cdecl; external;
 
 { compatibility }
 function lua_istable(L: Plua_State; N: Integer): Boolean;
@@ -1909,24 +1925,6 @@ begin
   Result := luaL_checklstring(L, n, nil);
 end;
 
-(*
-procedure luaL_requiref(L: Plua_State; modname: PAnsiChar; openf: lua_CFunction; glb: Integer);
-begin
-  lua_pushcfunction(L, openf);
-  lua_pushstring(L, modname);
-  lua_call(L, 1, 1);
-  lua_getfield(L, LUA_REGISTRYINDEX, '_LOADED');
-  lua_pushvalue(L, -2);
-  lua_setfield(L, -2, modname);
-  lua_pop(L, 1);
-  if glb <> 0 then
-  begin
-    lua_pushvalue(L, -1);
-    lua_setglobal(L, modname);
-  end;
-end;
-*)
-
 procedure luaL_requiref(L: Plua_State; modname: PAnsiChar; openf: lua_CFunction; glb: Integer);
 begin
   lua_pushcfunction(L, openf);  // Push the module loader function
@@ -1989,6 +1987,28 @@ begin
   Result := (LNumber = LIntValue) and
             (LIntValue >= -9223372036854775808.0) and  // Min Int64
             (LIntValue <= 9223372036854775807.0);      // Max Int64
+end;
+
+procedure lua_updateargs(L: Plua_State; StartIndex: Integer);
+var
+  I: Integer;
+begin
+  // Delete the existing 'arg' table by assigning nil to it
+  lua_pushnil(L);
+  lua_setglobal(L, 'arg');
+
+  // Create a new 'arg' table
+  lua_newtable(L);
+
+  // Populate the 'arg' table starting from StartIndex
+  for I := StartIndex to ParamCount do
+  begin
+    lua_pushstring(L, PAnsiChar(UTF8Encode(ParamStr(I)))); // Push each argument as UTF-8 string
+    lua_rawseti(L, -2, I - StartIndex);                    // Set table index (starting from 0)
+  end;
+
+  // Assign the new table to the global 'arg'
+  lua_setglobal(L, 'arg');
 end;
 
 {$REGION ' LUA DEBUGGER '}
@@ -3045,6 +3065,8 @@ begin
 end;
 
 function TjetLua.Open(): Boolean;
+var
+  I: Integer;
 begin
   Result := False;
   if Assigned(FState) then Exit;
@@ -3067,6 +3089,9 @@ begin
   SetVariable('jetLua.version', JETLUA_VERSION_FULL);
 
   dbg_setup_default(FState);
+
+  // Create the 'arg' table
+  lua_updateargs(FState, 0);
 
   Result := True;
 end;
@@ -3475,6 +3500,16 @@ begin
       RegisterMethod(LMethod, AClass);
 
   lua_setglobal(FState, AsUTF8(LActualTableName));
+end;
+
+procedure TjetLua.UpdateArgs(const AStartIndex: Integer);
+var
+  LStartIndex: Integer;
+begin
+  if not Assigned(FState) then Exit;
+
+  LStartIndex := EnsureRange(AStartIndex, 0, ParamCount-1);
+  lua_updateargs(FState, LStartIndex);
 end;
 
 function TjetLua.LoadFile(const AFilename: string; const AAutoRun: Boolean): Boolean;

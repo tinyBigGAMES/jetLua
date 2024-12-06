@@ -255,6 +255,7 @@ begin
     end;
 
     PrintLn('Running script: "%s"', [LFilename]);
+    FLua.UpdateArgs(2); // skip 'jlu run' on the commandline
     FLua.LoadFile(LFilename);
   except
     on E: Exception do
