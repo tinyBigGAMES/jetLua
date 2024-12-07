@@ -3065,8 +3065,6 @@ begin
 end;
 
 function TjetLua.Open(): Boolean;
-var
-  I: Integer;
 begin
   Result := False;
   if Assigned(FState) then Exit;
